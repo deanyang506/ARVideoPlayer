@@ -11,8 +11,6 @@
 #import "ARVideoPlayerLayerView.h"
 #import "ARVideoResourceLoader.h"
 
-#define _CacheDirectory [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).firstObject stringByAppendingPathComponent:@"ARAVVideoPlayer"]
-
 inline static bool isFloatZero(float value) {
     return fabsf(value) <= 0.00001f;
 }
@@ -46,8 +44,6 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
     
     float   _playbackVolume;
     float   _playbackRate;
-    
-    NSURL *_cacheUrl;
 }
 
 @synthesize isSeeking = _isSeeking;
@@ -113,38 +109,6 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
     return [[[self class] alloc] initWithUrl:aUrl delegate:delegate];
 }
 
-- (void)enableResourceLoaderWithCachePath:(NSString *)cachePath {
-    
-    if (_isPrepareToPlay) {
-        return;
-    }
-    
-    NSFileManager *fileMgr = [NSFileManager defaultManager];
-    BOOL isDirectory;
-    if ([fileMgr fileExistsAtPath:cachePath isDirectory:&isDirectory]) {
-        if (!isDirectory) {
-            _cacheUrl = [NSURL URLWithString:cachePath];
-            return;
-        }
-    }
-    
-    if (_url) {
-        
-        NSTimeInterval t  = [[[NSDate date] init] timeIntervalSince1970];
-        NSString *cacheDirectory = _CacheDirectory;
-        NSString *tempPath = [cacheDirectory stringByAppendingPathComponent:[NSString stringWithFormat:@"_%@.temp",@(t)]];
-        if (![fileMgr fileExistsAtPath:cacheDirectory isDirectory:&isDirectory]) {
-            if(![fileMgr createDirectoryAtPath:cacheDirectory withIntermediateDirectories:YES attributes:nil error:nil]) {
-                return;
-            }
-        }
-        
-        if([fileMgr createFileAtPath:tempPath contents:nil attributes:nil]) {
-            _cacheUrl = [NSURL URLWithString:cachePath];
-        }
-    }
-}
-
 #pragma mark - setter & getter
 
 - (void)setState:(ARAVVideoPlayerState)state {
@@ -185,10 +149,6 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
         return CGSizeZero;
     
     return [videoTracks objectAtIndex:0].naturalSize;
-}
-
-- (NSString *)cachePath {
-    return [_cacheUrl absoluteString];
 }
 
 #pragma mark - observer
@@ -399,6 +359,10 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
     
     if (error) {
         [self onError:error];
+    } else {
+        if (self.autoPlay) {
+            [self play];
+        }
     }
 }
 

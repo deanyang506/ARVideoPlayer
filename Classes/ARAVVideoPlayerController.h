@@ -88,12 +88,6 @@ typedef NS_ENUM(NSInteger, ARAVVideoScalingMode) {
 
 @property (nonatomic, assign) ARAVVideoScalingMode scalingMode;
 
-
-/** 启用资源下载器，边下边播，[prepareToPlay]前有效，cachePath缓存的目录 */
-- (void)enableResourceLoaderWithCachePath:(NSString *)cachePath;
-/** 启用时目录不存在时，将临时创建目录否则传入的目录 */
-@property (nonatomic, strong, readonly) NSString *cachePath;
-
 /**
     http/htttps
     file
@@ -101,6 +95,7 @@ typedef NS_ENUM(NSInteger, ARAVVideoScalingMode) {
 
 + (instancetype)playerWithUrl:(NSString *)aUrl delegate:(id<ARAVVideoPlayerDelegate>)delegate;
 - (instancetype)initWithUrl:(NSString *)aUrl delegate:(id<ARAVVideoPlayerDelegate>)delegate;
+@property (nonatomic, assign) BOOL autoPlay; // 自动播放
 
 // 截取当前时间的缩略图
 - (UIImage *)thumbnailImageAtCurrentTime;

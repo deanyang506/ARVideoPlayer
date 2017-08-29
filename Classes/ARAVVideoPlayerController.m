@@ -393,11 +393,12 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
     NSArray *requestedKeys = @[@"playable"];
     
     _urlAsset = asset;
+    __weak typeof(self) wself = self;
     [asset loadValuesAsynchronouslyForKeys:requestedKeys
                          completionHandler:^{
                              dispatch_async( dispatch_get_main_queue(), ^{
-                                 [self didPrepareToPlayAsset:asset withKeys:requestedKeys];
-                                 [self setPlaybackVolume:_playbackVolume];
+                                 [wself didPrepareToPlayAsset:asset withKeys:requestedKeys];
+                                 [wself setPlaybackVolume:_playbackVolume];
                              });
                          }];
 }
@@ -422,6 +423,9 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
 }
 
 - (void)shutDown {
+    
+    [_urlAsset cancelLoading];
+    _urlAsset = nil;
     
     if (!_isPrepareToPlay) {
         return;

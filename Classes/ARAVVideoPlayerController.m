@@ -28,6 +28,7 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
 @property (nonatomic, weak) id<ARAVVideoPlayerDelegate> delegate;
 
 @property (nonatomic, assign, readwrite) ARAVVideoPlayerState state;
+@property (nonatomic, assign) BOOL isShutdown;
 @end
 
 @implementation ARAVVideoPlayerController {
@@ -396,9 +397,12 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
     __weak typeof(self) wself = self;
     [asset loadValuesAsynchronouslyForKeys:requestedKeys
                          completionHandler:^{
+                             __strong typeof(wself) self = wself;
                              dispatch_async( dispatch_get_main_queue(), ^{
-                                 [wself didPrepareToPlayAsset:asset withKeys:requestedKeys];
-                                 [wself setPlaybackVolume:_playbackVolume];
+                                 if (!self.isShutdown) {
+                                     [self didPrepareToPlayAsset:asset withKeys:requestedKeys];
+                                     [self setPlaybackVolume:_playbackVolume];
+                                 }
                              });
                          }];
 }
@@ -423,6 +427,12 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
 }
 
 - (void)shutDown {
+    
+    if (self.isShutdown) {
+        return;
+    }
+    
+    self.isShutdown = YES;
     
     [_urlAsset cancelLoading];
     _urlAsset = nil;

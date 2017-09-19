@@ -14,7 +14,7 @@ typedef NS_ENUM(NSInteger, ARAVVideoPlayerState) {
     ARAVVideoPlayerStateReadlyToPlay,       // 已准备好等待播放
     ARAVVideoPlayerStatePlaying,            // 播放中
     ARAVVideoPlayerStatePaused,             // 已暂停
-    ARAVVideoPlayerStateStoped             // 已停止
+    ARAVVideoPlayerStateStoped              // 已停止
 };
 
 typedef NS_ENUM(NSInteger, ARAVVideoScalingMode) {
@@ -86,6 +86,7 @@ typedef NS_ENUM(NSInteger, ARAVVideoScalingMode) {
 @property (nonatomic, strong, readonly) UIView *view;
 @property (nonatomic, assign, readonly) CGSize naturalSize; // 视频原始大小
 
+// default is ARAVVideoScalingModeFill (填充)
 @property (nonatomic, assign) ARAVVideoScalingMode scalingMode;
 
 /**
@@ -94,7 +95,9 @@ typedef NS_ENUM(NSInteger, ARAVVideoScalingMode) {
  */
 
 + (instancetype)playerWithUrl:(NSString *)aUrl delegate:(id<ARAVVideoPlayerDelegate>)delegate;
-- (instancetype)initWithUrl:(NSString *)aUrl delegate:(id<ARAVVideoPlayerDelegate>)delegate;
+@property (nonatomic, strong) NSURL *url;
+
+@property (nonatomic, weak) id<ARAVVideoPlayerDelegate> delegate;
 @property (nonatomic, assign) BOOL autoPlay; // 自动播放
 
 // 截取当前时间的缩略图

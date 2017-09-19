@@ -24,8 +24,6 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
 }
 
 @interface ARAVVideoPlayerController()
-@property (nonatomic, strong) NSURL *url;
-@property (nonatomic, weak) id<ARAVVideoPlayerDelegate> delegate;
 
 @property (nonatomic, assign, readwrite) ARAVVideoPlayerState state;
 @property (nonatomic, assign) BOOL isShutdown;
@@ -64,12 +62,10 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
 - (instancetype)init {
     if (self = [super init]) {
         _view = [[ARVideoPlayerLayerView alloc] initWithFrame:CGRectZero];
-        _scalingMode = ARAVVideoScalingModeAspectFit;
+        self.scalingMode = ARAVVideoScalingModeFill;
         
         _playbackRate = 1.0; // rate default
         _playbackVolume = 1.0;
-        
-        [self stop];
     }
     
     return self;
@@ -87,19 +83,11 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
         
         if ([aUrl rangeOfString:@"/"].location == 0) {
             url = [NSURL fileURLWithPath:aUrl];
-            if ([url isFileURL]) {
-                _url = url;
-            }
-        }
-        else {
+        } else {
             url = [NSURL URLWithString:aUrl];
-            NSString *scheme = [url scheme];
-            if (scheme && ([scheme caseInsensitiveCompare:@"http"] == NSOrderedSame ||
-                           [scheme caseInsensitiveCompare:@"https"] == NSOrderedSame)) {
-                _url = url;
-            }
         }
         
+        self.url = url;
         _delegate = delegate;
     }
     
@@ -111,6 +99,18 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
 }
 
 #pragma mark - setter & getter
+
+- (void)setUrl:(NSURL *)url {
+    if ([url isFileURL]) {
+        _url = url;
+    } else {
+        NSString *scheme = [url scheme];
+        if (scheme && ([scheme caseInsensitiveCompare:@"http"] == NSOrderedSame ||
+                       [scheme caseInsensitiveCompare:@"https"] == NSOrderedSame)) {
+            _url = url;
+        }
+    }
+}
 
 - (void)setState:(ARAVVideoPlayerState)state {
     if (!(_state == state)) {
@@ -252,6 +252,9 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
         } else if ([keyPath isEqualToString:@"loadedTimeRanges"]) {
             [self didPlayableDurationUpdate];
         } else if ([keyPath isEqualToString:@"playbackBufferEmpty"]) {
+            if ([change[NSKeyValueChangeNewKey] isEqualToValue:change[NSKeyValueChangeOldKey]]) {
+                return;
+            }
             if (!_playerItem.isPlaybackBufferEmpty) {
                  return;
             }
@@ -469,6 +472,7 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
     
     [_player seekToTime:CMTimeMakeWithSeconds(time, NSEC_PER_SEC) completionHandler:^(BOOL finished) {
         _isSeeking = NO;
+        [self play];
         if (completion) {
             dispatch_async(dispatch_get_main_queue(), ^{
                 completion(finished);

@@ -387,6 +387,8 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
         return;
     }
     
+    self.isShutdown = NO;
+    
     AVURLAsset *asset;
     if ([_url isFileURL]) {
         asset = [AVURLAsset URLAssetWithURL:_url options:nil];
@@ -397,12 +399,11 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
     NSArray *requestedKeys = @[@"playable"];
     
     _urlAsset = asset;
-    __weak typeof(self) wself = self;
+   
     [asset loadValuesAsynchronouslyForKeys:requestedKeys
                          completionHandler:^{
-                             __strong typeof(wself) self = wself;
-                             dispatch_async( dispatch_get_main_queue(), ^{
-                                 if (!self.isShutdown) {
+                             dispatch_async(dispatch_get_main_queue(), ^{
+                                 if (self.isShutdown == NO) {
                                      [self didPrepareToPlayAsset:asset withKeys:requestedKeys];
                                      [self setPlaybackVolume:_playbackVolume];
                                  }

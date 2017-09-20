@@ -432,6 +432,8 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
 
 - (void)shutDown {
     
+    [self removeObserver];
+    
     if (self.isShutdown) {
         return;
     }
@@ -445,7 +447,7 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
         return;
     }
     
-    [self removeObserver];
+    
     [self clearUp];
     
     [_playerItem cancelPendingSeeks];

@@ -62,7 +62,7 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
 - (instancetype)init {
     if (self = [super init]) {
         _view = [[ARVideoPlayerLayerView alloc] initWithFrame:CGRectZero];
-        self.scalingMode = ARAVVideoScalingModeFill;
+        //self.scalingMode = ARAVVideoScalingModeCenter;
         
         _playbackRate = 1.0; // rate default
         _playbackVolume = 1.0;
@@ -149,7 +149,8 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
     if (videoTracks == nil || videoTracks.count <= 0)
         return CGSizeZero;
     
-    return [videoTracks objectAtIndex:0].naturalSize;
+    CGSize size = [videoTracks objectAtIndex:0].naturalSize;
+    return size;
 }
 
 #pragma mark - observer
@@ -396,7 +397,7 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
         asset = [AVURLAsset URLAssetWithURL:_url options:_headers == nil ? nil : @{@"AVURLAssetHTTPHeaderFieldsKey":_headers}];
     }
     
-    NSArray *requestedKeys = @[@"playable"];
+    NSArray *requestedKeys = @[@"playable",@"naturalSize"];
     
     _urlAsset = asset;
    

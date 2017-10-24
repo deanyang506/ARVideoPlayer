@@ -87,7 +87,7 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
             url = [NSURL URLWithString:aUrl];
         }
         
-        self.url = url;
+        _url = url;
         _delegate = delegate;
     }
     
@@ -99,18 +99,6 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
 }
 
 #pragma mark - setter & getter
-
-- (void)setUrl:(NSURL *)url {
-    if ([url isFileURL]) {
-        _url = url;
-    } else {
-        NSString *scheme = [url scheme];
-        if (scheme && ([scheme caseInsensitiveCompare:@"http"] == NSOrderedSame ||
-                       [scheme caseInsensitiveCompare:@"https"] == NSOrderedSame)) {
-            _url = url;
-        }
-    }
-}
 
 - (void)setState:(ARAVVideoPlayerState)state {
     if (!(_state == state)) {

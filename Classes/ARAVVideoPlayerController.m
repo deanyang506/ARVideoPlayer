@@ -283,7 +283,7 @@ static NSError *createError(NSInteger code,NSString *description, NSString *reas
     }
     
     _isCompleted = YES;
-    self.playerState = APVideoPlayerStateStoped;
+    self.state = APVideoPlayerStateStoped;
     
     dispatch_async(dispatch_get_main_queue(), ^{
         if ([self.delegate respondsToSelector:@selector(ARAVVideoPlayerControllerDidFinshPlayVideo:)]) {
